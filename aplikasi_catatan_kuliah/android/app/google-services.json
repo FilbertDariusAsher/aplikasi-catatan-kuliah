@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1050850706845",
+    "firebase_url": "https://aplikasi-catatan-kuliah-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "aplikasi-catatan-kuliah",
+    "storage_bucket": "aplikasi-catatan-kuliah.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1050850706845:android:f1fe52c56f43e72eb71b74",
+        "android_client_info": {
+          "package_name": "com.example.aplikasi_catatan_kuliah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChKVgHjDYIBOCsoVh0j-CnL74pML3Nc-c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
