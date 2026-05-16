@@ -23,8 +23,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -33,7 +36,9 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.indigo.shade800, Colors.indigo.shade600],
+                  colors: isDark
+                      ? [Colors.indigo.shade900, Colors.indigo.shade700]
+                      : [Colors.indigo.shade800, Colors.indigo.shade600],
                 ),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(28),
@@ -123,9 +128,11 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        selectedItemColor: Colors.indigo.shade900,
-        unselectedItemColor: Colors.grey[600],
-        backgroundColor: Colors.white,
+        selectedItemColor: theme.colorScheme.primary,
+        unselectedItemColor: theme.colorScheme.onSurface.withOpacity(0.7),
+        backgroundColor:
+            theme.bottomNavigationBarTheme.backgroundColor ??
+            theme.colorScheme.surface,
         elevation: 10,
         type: BottomNavigationBarType.fixed,
         items: const [

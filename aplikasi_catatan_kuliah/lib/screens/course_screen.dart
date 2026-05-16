@@ -138,6 +138,9 @@ class _CourseScreenState extends State<CourseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return StreamBuilder<List<CourseModel>>(
       stream: _courseService.streamCourses(),
       builder: (context, snapshot) {
@@ -206,14 +209,14 @@ class _CourseScreenState extends State<CourseScreen> {
                           Icon(
                             Icons.school_outlined,
                             size: 84,
-                            color: Colors.indigo.shade200,
+                            color: theme.colorScheme.primary.withOpacity(0.3),
                           ),
                           const SizedBox(height: 18),
                           Text(
                             'Belum ada mata kuliah',
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.indigo.shade500,
+                              color: theme.colorScheme.primary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -221,7 +224,11 @@ class _CourseScreenState extends State<CourseScreen> {
                           Text(
                             'Tambahkan mata kuliah untuk memulai ringkasan materi',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.indigo.shade300),
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.6,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -234,11 +241,11 @@ class _CourseScreenState extends State<CourseScreen> {
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: theme.colorScheme.surface,
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
+                                color: theme.shadowColor.withOpacity(0.04),
                                 blurRadius: 14,
                                 offset: const Offset(0, 8),
                               ),
@@ -250,13 +257,13 @@ class _CourseScreenState extends State<CourseScreen> {
                               vertical: 14,
                             ),
                             leading: CircleAvatar(
-                              backgroundColor: Colors.indigo.shade700,
+                              backgroundColor: theme.colorScheme.primary,
                               child: Text(
                                 course.name.isNotEmpty
                                     ? course.name[0].toUpperCase()
                                     : '?',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onPrimary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -270,15 +277,19 @@ class _CourseScreenState extends State<CourseScreen> {
                             ),
                             subtitle: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.person,
                                   size: 14,
-                                  color: Colors.grey,
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.6),
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   course.lecturer,
-                                  style: TextStyle(color: Colors.grey.shade700),
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.7),
+                                  ),
                                 ),
                               ],
                             ),

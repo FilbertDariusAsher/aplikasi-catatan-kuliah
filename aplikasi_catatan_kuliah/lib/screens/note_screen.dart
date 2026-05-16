@@ -100,17 +100,14 @@ class _NoteScreenState extends State<NoteScreen> {
         _editingNote = null;
       });
 
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              isEditing ? 'Catatan diperbarui' : 'Catatan disimpan',
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isEditing ? 'Catatan diperbarui' : 'Catatan disimpan'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -125,26 +122,29 @@ class _NoteScreenState extends State<NoteScreen> {
     }
   }
 
-  void _showAddNoteSheet({NoteModel? note}) {
+  Future<void> _showAddNoteSheet({NoteModel? note}) async {
+    final sheetContext = context;
     _editingNote = note;
     _titleController.text = note?.title ?? '';
     _contentController.text = note?.content ?? '';
 
+    await _loadCourses();
+
     if (note != null) {
-      _selectedCourse = _courses.firstWhere(
-        (c) => c.id == note.courseId,
-        orElse: () => _courses.isNotEmpty
-            ? _courses.first
-            : CourseModel(name: '', lecturer: ''),
-      );
+      CourseModel? selectedCourse;
+      for (final course in _courses) {
+        if (course.id == note.courseId) {
+          selectedCourse = course;
+          break;
+        }
+      }
+      _selectedCourse = selectedCourse;
     } else {
       _selectedCourse = null;
     }
 
-    _loadCourses();
-
     showModalBottomSheet(
-      context: context,
+      context: sheetContext,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -186,7 +186,7 @@ class _NoteScreenState extends State<NoteScreen> {
                   ),
                   const SizedBox(height: 20),
                   DropdownButtonFormField<CourseModel>(
-                    value: _selectedCourse,
+                    initialValue: _selectedCourse,
                     decoration: const InputDecoration(
                       labelText: 'Mata Kuliah',
                       prefixIcon: Icon(Icons.school),
@@ -280,6 +280,7 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   void _showNoteDetail(NoteModel note) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -292,14 +293,14 @@ class _NoteScreenState extends State<NoteScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.indigo.shade50,
+                  color: theme.colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Colors.indigo.shade200),
+                  border: Border.all(color: theme.colorScheme.outline),
                 ),
                 child: Text(
                   note.courseName,
                   style: TextStyle(
-                    color: Colors.indigo.shade700,
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -335,16 +336,16 @@ class _NoteScreenState extends State<NoteScreen> {
           ),
           TextButton.icon(
             onPressed: () async {
+              final dialogContext = context;
               await _noteService.deleteNote(note.id!);
-              if (mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('🗑️ Catatan dihapus'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
+              if (!mounted) return;
+              Navigator.pop(dialogContext);
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                const SnackBar(
+                  content: Text('🗑️ Catatan dihapus'),
+                  backgroundColor: Colors.red,
+                ),
+              );
             },
             icon: const Icon(Icons.delete, color: Colors.red),
             label: const Text('Hapus', style: TextStyle(color: Colors.red)),
@@ -360,6 +361,8 @@ class _NoteScreenState extends State<NoteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         Padding(
@@ -368,11 +371,12 @@ class _NoteScreenState extends State<NoteScreen> {
             controller: _searchController,
             onChanged: (value) =>
                 setState(() => _searchQuery = value.toLowerCase()),
+            style: theme.textTheme.bodyLarge,
             decoration: InputDecoration(
               hintText: 'Cari catatan...',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: Icon(Icons.search, color: theme.iconTheme.color),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: theme.colorScheme.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: BorderSide.none,
@@ -471,7 +475,9 @@ class _NoteScreenState extends State<NoteScreen> {
                                 Icon(
                                   Icons.note_outlined,
                                   size: 88,
-                                  color: Colors.indigo.shade200,
+                                  color: theme.colorScheme.primary.withOpacity(
+                                    0.3,
+                                  ),
                                 ),
                                 const SizedBox(height: 18),
                                 Text(
@@ -480,7 +486,7 @@ class _NoteScreenState extends State<NoteScreen> {
                                       : 'Catatan tidak ditemukan',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    color: Colors.indigo.shade400,
+                                    color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -491,7 +497,8 @@ class _NoteScreenState extends State<NoteScreen> {
                                       : 'Coba kata kunci lain atau tambahkan catatan baru',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: Colors.indigo.shade300,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.6),
                                   ),
                                 ),
                               ],
@@ -505,11 +512,16 @@ class _NoteScreenState extends State<NoteScreen> {
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: theme.colorScheme.surface,
                                   borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(
+                                    color: theme.dividerColor.withOpacity(0.8),
+                                  ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.04),
+                                      color: theme.shadowColor.withOpacity(
+                                        0.04,
+                                      ),
                                       blurRadius: 14,
                                       offset: const Offset(0, 8),
                                     ),
@@ -535,14 +547,18 @@ class _NoteScreenState extends State<NoteScreen> {
                                               vertical: 6,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: Colors.indigo.shade50,
+                                              color: theme
+                                                  .colorScheme
+                                                  .surfaceVariant,
                                               borderRadius:
                                                   BorderRadius.circular(12),
                                             ),
                                             child: Text(
                                               note.courseName,
                                               style: TextStyle(
-                                                color: Colors.indigo.shade700,
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 12,
                                               ),
@@ -562,7 +578,8 @@ class _NoteScreenState extends State<NoteScreen> {
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
-                                              color: Colors.grey.shade600,
+                                              color: theme.colorScheme.onSurface
+                                                  .withOpacity(0.6),
                                               height: 1.45,
                                             ),
                                           ),
@@ -572,7 +589,10 @@ class _NoteScreenState extends State<NoteScreen> {
                                               Icon(
                                                 Icons.access_time,
                                                 size: 14,
-                                                color: Colors.grey.shade500,
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withOpacity(0.5),
                                               ),
                                               const SizedBox(width: 6),
                                               Text(
@@ -580,7 +600,10 @@ class _NoteScreenState extends State<NoteScreen> {
                                                   note.timestamp,
                                                 ),
                                                 style: TextStyle(
-                                                  color: Colors.grey.shade500,
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withOpacity(0.5),
                                                   fontSize: 12,
                                                 ),
                                               ),
